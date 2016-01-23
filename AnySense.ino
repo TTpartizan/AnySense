@@ -2,6 +2,8 @@
 #include <Wire.h>
 #include <Arduino.h>
 
+#define VERSION 0.1
+
 //=======================================
 //=======================================
 #if Output_LCD>0
