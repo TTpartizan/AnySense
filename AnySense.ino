@@ -43,62 +43,120 @@
 //=======================================
 //=======================================
 #if Sense_PM>0
+  #if Sense_PM==1
+    // Serial1.begin(9600);
+  #elif Sense_PM==2
+    #include <SoftwareSerial.h>
+    SoftwareSerial mySerial(10, 11); 
+  #endif
+
 
   void init_Sensor_PM(){
     #if Sense_PM==1
       // Serial1.begin(9600);
+    #elif Sense_PM==2
+      // mySerial.begin(9600);
     #endif
     return;
   }
 
   void get_Sensor_PM(int *PM1 = 0, int *PM25 = 0, int *PM10 = 0){
-    // based on the LASS codes: https://github.com/LinkItONEDevGroup/LASS/blob/master/Device_LinkItOne/LASS/LASS.ino
-    unsigned long timeout = millis();
-    int count=0;
-    byte incomeByte[24];
-    boolean startcount=false;
-    byte data;
-    *PM1 = 0;
-    *PM25 = 0;
-    *PM10 = 0;
-    Serial1.begin(9600);
-    while (1){
-      if((millis() - timeout) > 3000) {    
-        Serial.println("[G3-ERROR-TIMEOUT]");
-        break;
-      }
-      if(Serial1.available()){
-        data=Serial1.read();
-        if(data==0x42 && !startcount){
-          startcount = true;
-          count++;
-          incomeByte[0]=data;
-        } else if (startcount){
-          count++;
-          incomeByte[count-1]=data;
-          if(count>=24) {break;}
+    
+    #if Sense_PM==1
+    
+      // based on the LASS codes: https://github.com/LinkItONEDevGroup/LASS/blob/master/Device_LinkItOne/LASS/LASS.ino
+      unsigned long timeout = millis();
+      int count=0;
+      byte incomeByte[24];
+      boolean startcount=false;
+      byte data;
+      Serial1.begin(9600);
+      while (1){
+        if((millis() - timeout) > 3000) {    
+          Serial.println("[G3-ERROR-TIMEOUT]");
+          break;
+        }
+        if(Serial1.available()){
+          data=Serial1.read();
+          if(data==0x42 && !startcount){
+            startcount = true;
+            count++;
+            incomeByte[0]=data;
+          } else if (startcount){
+            count++;
+            incomeByte[count-1]=data;
+            if(count>=24) {break;}
+          }
         }
       }
-    }
-    Serial1.end();
-    Serial1.flush();
-    unsigned int calcsum = 0; // BM
-    unsigned int exptsum;
-    for(int i = 0; i < 22; i++) {
-      calcsum += (unsigned int)incomeByte[i];
-    }
-  
-    exptsum = ((unsigned int)incomeByte[22] << 8) + (unsigned int)incomeByte[23];
-    if(calcsum == exptsum) {
-      *PM1 = ((unsigned int)incomeByte[10] << 8) + (unsigned int)incomeByte[11];
-      *PM25 = ((unsigned int)incomeByte[12] << 8) + (unsigned int)incomeByte[13];
-      *PM10 = ((unsigned int)incomeByte[14] << 8) + (unsigned int)incomeByte[15];
-    } else {
-      Serial.println("#[exception] PM2.5 Sensor CHECKSUM ERROR!");
-      *PM1 = -1;
-      *PM25 = -1;
-      *PM10 = -1;
-    }  
+      Serial1.end();
+      Serial1.flush();
+      unsigned int calcsum = 0; // BM
+      unsigned int exptsum;
+      for(int i = 0; i < 22; i++) {
+        calcsum += (unsigned int)incomeByte[i];
+      }
+    
+      exptsum = ((unsigned int)incomeByte[22] << 8) + (unsigned int)incomeByte[23];
+      if(calcsum == exptsum) {
+        *PM1 = ((unsigned int)incomeByte[10] << 8) + (unsigned int)incomeByte[11];
+        *PM25 = ((unsigned int)incomeByte[12] << 8) + (unsigned int)incomeByte[13];
+        *PM10 = ((unsigned int)incomeByte[14] << 8) + (unsigned int)incomeByte[15];
+      } else {
+        Serial.println("#[exception] PM2.5 Sensor CHECKSUM ERROR!");
+        *PM1 = -1;
+        *PM25 = -1;
+        *PM10 = -1;
+      }  
+      
+    #elif Sense_PM==2
+    
+      // based on the LASS codes: https://github.com/LinkItONEDevGroup/LASS/blob/master/Device_LinkItOne/LASS/LASS.ino
+      unsigned long timeout = millis();
+      int count=0;
+      byte incomeByte[24];
+      boolean startcount=false;
+      byte data;
+      mySerial.begin(9600);
+      while (1){
+        if((millis() - timeout) > 3000) {    
+          Serial.println("[G3-ERROR-TIMEOUT]");
+          break;
+        }
+        if(mySerial.available()){
+          data=mySerial.read();
+          if(data==0x42 && !startcount){
+            startcount = true;
+            count++;
+            incomeByte[0]=data;
+          } else if (startcount){
+            count++;
+            incomeByte[count-1]=data;
+            if(count>=24) {break;}
+          }
+        }
+      }
+      mySerial.end();
+      mySerial.flush();
+      unsigned int calcsum = 0; // BM
+      unsigned int exptsum;
+      for(int i = 0; i < 22; i++) {
+        calcsum += (unsigned int)incomeByte[i];
+      }
+    
+      exptsum = ((unsigned int)incomeByte[22] << 8) + (unsigned int)incomeByte[23];
+      if(calcsum == exptsum) {
+        *PM1 = ((unsigned int)incomeByte[10] << 8) + (unsigned int)incomeByte[11];
+        *PM25 = ((unsigned int)incomeByte[12] << 8) + (unsigned int)incomeByte[13];
+        *PM10 = ((unsigned int)incomeByte[14] << 8) + (unsigned int)incomeByte[15];
+      } else {
+        Serial.println("#[exception] PM2.5 Sensor CHECKSUM ERROR!");
+        *PM1 = -1;
+        *PM25 = -1;
+        *PM10 = -1;
+      }  
+    #endif
+    
     return;
   }
 
@@ -220,21 +278,20 @@
 #if Sense_TH>0
 
   #if Sense_TH==1
-    #include <DHT.h>
-    #define DHTPIN A0           // what pin we're connected to
-    #define DHTTYPE DHT22       // DHT 22  (AM2302)
-    DHT dht(DHTPIN, DHTTYPE);
+/*    #include <DHT.h>
+    DHT dht(DHTPIN_A, DHTTYPE_A);
   #elif Sense_TH==2
+ */
     #include <DHT_linkit.h>
-    #define DHTPIN 5     // what pin we're connected to
-    #define DHTTYPE DHT22   // DHT 22  (AM2302)
-    DHT_linkit dht(DHTPIN, DHTTYPE);
+    DHT_linkit dht(DHTPIN_D, DHTTYPE_D);
   #endif
 
   void init_Sensor_Temperature(){
     #if Sense_TH==1
+/*
       dht.begin();
     #elif Sense_TH==2
+ */
       dht.begin();
     #endif
     return;  
@@ -244,8 +301,10 @@
   float temperature = 0.0;
   float humidity = 0.0;
     #if Sense_TH==1
+/*      
       temperature = dht.readTemperature();
     #elif Sense_TH==2
+ */
       dht.readHT(&temperature, &humidity);
       while (isnan(temperature) || isnan(humidity) || temperature<0 || temperature>80 || humidity<0 || humidity > 100){
         Serial.println("Something wrong with DHT => retry it!");
@@ -260,8 +319,10 @@
   float temperature = 0.0;
   float humidity = 0.0;
     #if Sense_TH==1
+/*
       humidity = dht.readHumidity();
     #elif Sense_TH==2
+ */
       dht.readHT(&temperature, &humidity);
       while (isnan(temperature) || isnan(humidity) || temperature<0 || temperature>80 || humidity<0 || humidity > 100){
         Serial.println("Something wrong with DHT => retry it!");
