@@ -48,6 +48,11 @@
   #elif Sense_PM==2
     #include <SoftwareSerial.h>
     SoftwareSerial mySerial(10, 11); 
+  #elif Sense_PM==3
+    // Serial1.begin(9600);
+  #elif Sense_PM==4
+    #include <SoftwareSerial.h>
+    SoftwareSerial mySerial(10, 11);
   #endif
 
 
@@ -55,6 +60,10 @@
     #if Sense_PM==1
       // Serial1.begin(9600);
     #elif Sense_PM==2
+      // mySerial.begin(9600);
+    #elif Sense_PM==3
+      // Serial1.begin(9600);
+    #elif Sense_PM==4
       // mySerial.begin(9600);
     #endif
     return;
@@ -154,7 +163,102 @@
         *PM1 = -1;
         *PM25 = -1;
         *PM10 = -1;
+      } 
+
+    #elif Sense_PM==3
+
+      unsigned long timeout = millis();
+      int count=0;
+      byte incomeByte[32];
+      boolean startcount=false;
+      byte data;
+      Serial1.begin(9600);
+      while (1){
+        if((millis() -timeout) > 1500) {    
+          Serial.println("[A4-ERROR-TIMEOUT]");
+          //#TODO:make device fail alarm message here
+          break;
+        }
+        if(Serial1.available()){
+          data=Serial1.read();
+          if(data==0x32 && !startcount){
+            startcount = true;
+            count++;
+            incomeByte[0]=data;
+          }else if(startcount){
+            count++;
+            incomeByte[count-1]=data;
+            if(count>=32) {break;}
+          }
+        }
+      }
+      Serial1.end();
+      Serial1.flush();
+      unsigned int calcsum = 0; // BM
+      unsigned int exptsum;
+      for(int i = 0; i < 29; i++) {
+        calcsum += (unsigned int)incomeByte[i];
+      }
+      
+      exptsum = ((unsigned int)incomeByte[30] << 8) + (unsigned int)incomeByte[31];
+      if(calcsum == exptsum) {
+        *PM1 = ((unsigned int)incomeByte[4] << 8) + (unsigned int)incomeByte[5];
+        *PM25 = ((unsigned int)incomeByte[6] << 8) + (unsigned int)incomeByte[7];
+        *PM10 = ((unsigned int)incomeByte[8] << 8) + (unsigned int)incomeByte[9];
+      } else {
+        Serial.println("#[exception] PM2.5 Sensor CHECKSUM ERROR!");
+        *PM1 = -1;
+        *PM25 = -1;
+        *PM10 = -1;
+      }     
+
+    #elif Sense_PM==4
+
+      unsigned long timeout = millis();
+      int count=0;
+      byte incomeByte[32];
+      boolean startcount=false;
+      byte data;
+      mySerial.begin(9600);
+      while (1){
+        if((millis() -timeout) > 1500) {    
+          Serial.println("[A4-ERROR-TIMEOUT]");
+          //#TODO:make device fail alarm message here
+          break;
+        }
+        if(mySerial.available()){
+          data=mySerial.read();
+          if(data==0x32 && !startcount){
+            startcount = true;
+            count++;
+            incomeByte[0]=data;
+          }else if(startcount){
+            count++;
+            incomeByte[count-1]=data;
+            if(count>=32) {break;}
+          }
+        }
+      }
+      mySerial.end();
+      mySerial.flush();
+      unsigned int calcsum = 0; // BM
+      unsigned int exptsum;
+      for(int i = 0; i < 29; i++) {
+        calcsum += (unsigned int)incomeByte[i];
+      }
+      
+      exptsum = ((unsigned int)incomeByte[30] << 8) + (unsigned int)incomeByte[31];
+      if(calcsum == exptsum) {
+        *PM1 = ((unsigned int)incomeByte[4] << 8) + (unsigned int)incomeByte[5];
+        *PM25 = ((unsigned int)incomeByte[6] << 8) + (unsigned int)incomeByte[7];
+        *PM10 = ((unsigned int)incomeByte[8] << 8) + (unsigned int)incomeByte[9];
+      } else {
+        Serial.println("#[exception] PM2.5 Sensor CHECKSUM ERROR!");
+        *PM1 = -1;
+        *PM25 = -1;
+        *PM10 = -1;
       }  
+      
     #endif
     
     return;
