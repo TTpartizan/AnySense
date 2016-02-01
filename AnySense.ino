@@ -279,7 +279,7 @@
       Serial1.begin(9600);
       while (1){
         if((millis() - timeout) > 3000) {    
-          Serial.println("[G3-ERROR-TIMEOUT]");
+          Serial.println("[G5-ERROR-TIMEOUT]");
           break;
         }
         if(Serial1.available()){
@@ -326,7 +326,7 @@
       mySerial.begin(9600);
       while (1){
         if((millis() - timeout) > 3000) {    
-          Serial.println("[G3-ERROR-TIMEOUT]");
+          Serial.println("[G5-ERROR-TIMEOUT]");
           break;
         }
         if(mySerial.available()){
