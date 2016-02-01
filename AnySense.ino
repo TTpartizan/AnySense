@@ -378,6 +378,15 @@
   #elif Sense_Barometer==2
     #include <Barometer.h>
     Barometer myBarometer;
+  #elif Sense_Barometer==3
+    #ifndef __BME280__
+      #define __BME280__
+      #include <Adafruit_BME280.h>
+      #include <Adafruit_Sensor.h>
+      #include <SPI.h>
+      Adafruit_BME280 bme;
+    #endif
+    #define SEALEVELPRESSURE_HPA (1013.25)
   #endif
 
   void init_Sensor_Barometer(){
@@ -395,6 +404,8 @@
       }
     #elif Sense_Barometer==2
       myBarometer.init();
+    #elif Sense_Barometer==3
+      // BME280 has been setup in Sense_TH
     #endif
   
     return;  
@@ -408,6 +419,8 @@
       }
     #elif Sense_Barometer==2
       temperature = myBarometer.bmp085GetTemperature(myBarometer.bmp085ReadUT()); //Get the temperature, bmp085ReadUT MUST be called first
+    #elif Sense_Barometer==3
+      temperature = bme.readTemperature();
     #endif
     return temperature;
   }
@@ -420,6 +433,8 @@
       }
     #elif Sense_Barometer==2
       altitude = myBarometer.calcAltitude(get_Sensor_Barometer_Pressure()); //Uncompensated calculation - in Meters 
+    #elif Sense_Barometer==3
+      altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
     #endif
     return altitude;
   }
@@ -432,6 +447,8 @@
       }
     #elif Sense_Barometer==2
       pressure = myBarometer.bmp085GetPressure(myBarometer.bmp085ReadUP());//Get the temperature
+    #elif Sense_Barometer==3
+      pressure = bme.readPressure() / 100.0F;
     #endif
     return pressure;
   }
@@ -490,6 +507,14 @@
  */
     #include <DHT_linkit.h>
     DHT_linkit dht(DHTPIN_D, DHTTYPE_D);
+  #elif Sense_TH==2
+    #ifndef __BME280__
+      #define __BME280__
+      #include <Adafruit_BME280.h>
+      #include <Adafruit_Sensor.h>
+      #include <SPI.h>
+      Adafruit_BME280 bme;
+    #endif
   #endif
 
   void init_Sensor_Temperature(){
@@ -499,6 +524,11 @@
     #elif Sense_TH==2
  */
       dht.begin();
+    #elif Sense_TH==2
+      if (!bme.begin()) {
+        Serial.println("Could not find a valid BME280 sensor, check wiring!");
+        while (1);
+       }
     #endif
     return;  
   }
@@ -516,7 +546,9 @@
         Serial.println("Something wrong with DHT => retry it!");
         delay(100);
         dht.readHT(&temperature, &humidity);    
-      }    
+      }
+    #elif Sense_TH==2
+      temperature = bme.readTemperature();  
     #endif
     return temperature;
   }
@@ -534,7 +566,9 @@
         Serial.println("Something wrong with DHT => retry it!");
         delay(100);
         dht.readHT(&temperature, &humidity);    
-      }    
+      }
+    #elif Sense_TH==2
+      humidity = bme.readHumidity(); 
     #endif
     return humidity;
   }

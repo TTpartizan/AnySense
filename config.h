@@ -1,8 +1,8 @@
 // Sense_TH: whether temperature/humidity sensor is used
 // 0: none
-// 1: Grove - Temperature and Humidity Sensor Pro (Analog, A0)
-// 2: Grove - Temperature and Humidity Sensor Pro (Digital, D5)
-#define Sense_TH        0
+// 1: Grove - Temperature and Humidity Sensor Pro (Digital, D5)
+// 2: Boshi BME280 (I2C)
+#define Sense_TH        3
 #define DHTPIN_A A0    // A0
 #define DHTTYPE_A DHT22   // DHT 22  (AM2302)
 #define DHTPIN_D 5     // D5
@@ -18,7 +18,8 @@
 // 0: none
 // 1: Grove - Grove - Barometer (High-Accuracy) (I2C)
 // 2: Grove - Barometer Sensor (BMP180) (I2C)
-#define Sense_Barometer 0
+// 3: Boshi BME280 (I2C)
+#define Sense_Barometer 3
 
 // Sense_PM: whether particulate matter sensor is used
 // 0: none
