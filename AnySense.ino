@@ -53,6 +53,11 @@
   #elif Sense_PM==4
     #include <SoftwareSerial.h>
     SoftwareSerial mySerial(10, 11);
+  #elif Sense_PM==5
+    // Serial1.begin(9600);
+  #elif Sense_PM==6
+    #include <SoftwareSerial.h>
+    SoftwareSerial mySerial(10, 11);
   #endif
 
 
@@ -64,6 +69,10 @@
     #elif Sense_PM==3
       // Serial1.begin(9600);
     #elif Sense_PM==4
+      // mySerial.begin(9600);
+    #elif Sense_PM==5
+      // Serial1.begin(9600);
+    #elif Sense_PM==6
       // mySerial.begin(9600);
     #endif
     return;
@@ -258,7 +267,100 @@
         *PM25 = -1;
         *PM10 = -1;
       }  
+
+    #elif Sense_PM==5
+    
+      // based on the LASS codes: https://github.com/LinkItONEDevGroup/LASS/blob/master/Device_LinkItOne/LASS/LASS.ino
+      unsigned long timeout = millis();
+      int count=0;
+      byte incomeByte[32];
+      boolean startcount=false;
+      byte data;
+      Serial1.begin(9600);
+      while (1){
+        if((millis() - timeout) > 3000) {    
+          Serial.println("[G3-ERROR-TIMEOUT]");
+          break;
+        }
+        if(Serial1.available()){
+          data=Serial1.read();
+          if(data==0x42 && !startcount){
+            startcount = true;
+            count++;
+            incomeByte[0]=data;
+          } else if (startcount){
+            count++;
+            incomeByte[count-1]=data;
+            if(count>=32) {break;}
+          }
+        }
+      }
+      Serial1.end();
+      Serial1.flush();
+      unsigned int calcsum = 0; // BM
+      unsigned int exptsum;
+      for(int i = 0; i < 29; i++) {
+        calcsum += (unsigned int)incomeByte[i];
+      }
+    
+      exptsum = ((unsigned int)incomeByte[30] << 8) + (unsigned int)incomeByte[31];
+      if(calcsum == exptsum) {
+        *PM1 = ((unsigned int)incomeByte[10] << 8) + (unsigned int)incomeByte[11];
+        *PM25 = ((unsigned int)incomeByte[12] << 8) + (unsigned int)incomeByte[13];
+        *PM10 = ((unsigned int)incomeByte[14] << 8) + (unsigned int)incomeByte[15];
+      } else {
+        Serial.println("#[exception] PM2.5 Sensor CHECKSUM ERROR!");
+        *PM1 = -1;
+        *PM25 = -1;
+        *PM10 = -1;
+      }  
       
+    #elif Sense_PM==6
+    
+      // based on the LASS codes: https://github.com/LinkItONEDevGroup/LASS/blob/master/Device_LinkItOne/LASS/LASS.ino
+      unsigned long timeout = millis();
+      int count=0;
+      byte incomeByte[32];
+      boolean startcount=false;
+      byte data;
+      mySerial.begin(9600);
+      while (1){
+        if((millis() - timeout) > 3000) {    
+          Serial.println("[G3-ERROR-TIMEOUT]");
+          break;
+        }
+        if(mySerial.available()){
+          data=mySerial.read();
+          if(data==0x42 && !startcount){
+            startcount = true;
+            count++;
+            incomeByte[0]=data;
+          } else if (startcount){
+            count++;
+            incomeByte[count-1]=data;
+            if(count>=32) {break;}
+          }
+        }
+      }
+      mySerial.end();
+      mySerial.flush();
+      unsigned int calcsum = 0; // BM
+      unsigned int exptsum;
+      for(int i = 0; i < 29; i++) {
+        calcsum += (unsigned int)incomeByte[i];
+      }
+    
+      exptsum = ((unsigned int)incomeByte[30] << 8) + (unsigned int)incomeByte[31];
+      if(calcsum == exptsum) {
+        *PM1 = ((unsigned int)incomeByte[10] << 8) + (unsigned int)incomeByte[11];
+        *PM25 = ((unsigned int)incomeByte[12] << 8) + (unsigned int)incomeByte[13];
+        *PM10 = ((unsigned int)incomeByte[14] << 8) + (unsigned int)incomeByte[15];
+      } else {
+        Serial.println("#[exception] PM2.5 Sensor CHECKSUM ERROR!");
+        *PM1 = -1;
+        *PM25 = -1;
+        *PM10 = -1;
+      } 
     #endif
     
     return;

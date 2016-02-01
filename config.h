@@ -26,7 +26,9 @@
 // 2: PMS3003 (G3 sensor) (SoftwareSerial; rx:10, tx:11)
 // 3: CP-15-A4 (A4 sensor) (UART)
 // 4: CP-15-A4 (A4 sensor) (SoftwareSerial; rx:10, tx:11)
-#define Sense_PM        2
+// 5: PMS5003 (G5 sensor) (UART)
+// 6: PMS5003 (G5 sensor) (SoftwareSerial; rx:10, tx:11)
+#define Sense_PM        6
 
 // Output_LCD: whether LCD is used
 // 0: none
