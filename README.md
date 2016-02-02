@@ -2,7 +2,7 @@
 
 The objective of this projec tis to provide a template for quick prototyping of Arduino-like sensor projects. 
 
-Currently, the project support the following sensors:
+Currently, the project supports the following sensors:
 
 - Grove - Temperature and Humidity Sensor Pro
   - http://www.seeedstudio.com/wiki/Grove_-_Temperature_and_Humidity_Sensor_Pro
