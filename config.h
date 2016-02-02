@@ -1,10 +1,8 @@
 // Sense_TH: whether temperature/humidity sensor is used
 // 0: none
 // 1: Grove - Temperature and Humidity Sensor Pro (Digital, D5)
-// 2: Boshi BME280 (I2C)
-#define Sense_TH        3
-#define DHTPIN_A A0    // A0
-#define DHTTYPE_A DHT22   // DHT 22  (AM2302)
+// 2: Bosch BME280 (I2C)
+#define Sense_TH        2
 #define DHTPIN_D 5     // D5
 #define DHTTYPE_D DHT22   // DHT 22  (AM2302)
 
