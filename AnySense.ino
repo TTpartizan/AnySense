@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-#define VERSION 0.1
+#define VERSION 0.2
 
 //=======================================
 //=======================================
