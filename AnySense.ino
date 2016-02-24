@@ -508,6 +508,9 @@
     #include <DHT_linkit.h>
     DHT_linkit dht(DHTPIN_D, DHTTYPE_D);
   #elif Sense_TH==2
+    #include <Adafruit_SHT31.h>
+    Adafruit_SHT31 sht31 = Adafruit_SHT31();
+  #elif Sense_TH==3
     #ifndef __BME280__
       #define __BME280__
       #include <Adafruit_BME280.h>
@@ -525,6 +528,11 @@
  */
       dht.begin();
     #elif Sense_TH==2
+      if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
+        Serial.println("Couldn't find SHT31");
+        while (1) delay(1);
+      }
+    #elif Sense_TH==3
       if (!bme.begin()) {
         Serial.println("Could not find a valid BME280 sensor, check wiring!");
         while (1);
@@ -548,8 +556,15 @@
         dht.readHT(&temperature, &humidity);    
       }
     #elif Sense_TH==2
+      temperature = sht31.readTemperature(); 
+    #elif Sense_TH==3
       temperature = bme.readTemperature();  
     #endif
+    
+    if (isnan(temperature)) {
+      Serial.println("Failed to read temperature");
+      temperature = 0; 
+    }
     return temperature;
   }
 
@@ -568,8 +583,15 @@
         dht.readHT(&temperature, &humidity);    
       }
     #elif Sense_TH==2
+      humidity = sht31.readHumidity(); 
+    #elif Sense_TH==3
       humidity = bme.readHumidity(); 
     #endif
+    
+    if (isnan(humidity)) {
+      Serial.println("Failed to read humidity");
+      humidity = 0; 
+    }
     return humidity;
   }
   

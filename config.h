@@ -1,8 +1,9 @@
 // Sense_TH: whether temperature/humidity sensor is used
 // 0: none
 // 1: Grove - Temperature and Humidity Sensor Pro (Digital, D5)
-// 2: Bosch BME280 (I2C)
-#define Sense_TH        2
+// 2: SHT31
+// 3: Bosch BME280 (I2C)
+#define Sense_TH        3
 #define DHTPIN_D 5     // D5
 #define DHTTYPE_D DHT22   // DHT 22  (AM2302)
 
@@ -32,7 +33,7 @@
 // Output_LCD: whether LCD is used
 // 0: none
 // 1: Grove - LCD RGB Backlight (I2C)
-#define Output_LCD      0     
+#define Output_LCD      1     
 
 
 
